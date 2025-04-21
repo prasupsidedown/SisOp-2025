@@ -37,7 +37,7 @@ Dimana:
 
 ---
 
-## **4.3 Does the multithreaded web server described in Section 4.1 exhibit task or data parallelism?r**
+## **4.3 Does the multithreaded web server described in Section 4.1 exhibit task or data parallelism?**
 Multithreaded web server menerapkan **task parallelism**, karena setiap thread menangani permintaan pengguna yang berbeda. Meskipun tugasnya serupa, eksekusinya tetap bersifat independen.
 
 ---
