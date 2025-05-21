@@ -86,4 +86,5 @@ Average TurnAroundTime=8.000000
 Average WaitingTime=4.000000
 
 Kesimpulan :
-Program ini menerapkan algoritma SJF Non-Preemptive dengan arrival time, memilih proses dengan burst time terkecil yang sudah datang. Program menghitung waktu eksekusi tiap proses (CT, TAT, WT, RT) dan rata-rata TAT serta WT.
+Program ini menerapkan algoritma SJF Non-Preemptive dengan arrival time, memilih proses dengan burst time terkecil yang sudah datang. 
+Program menghitung waktu eksekusi tiap proses (CT, TAT, WT, RT) dan rata-rata TAT serta WT.
