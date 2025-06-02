@@ -1,62 +1,90 @@
-1) SJF without arrival time (non-preemptive) 
+#  Shortest Job First (SJF) Without Arrival Time (Non-Preemptive)
 
-program : 
-#include<stdio.h>
-struct proc
-{
-    int no,bt,ct,tat,wt;
-};
-struct proc read(int i)
-{
-    struct proc p;
-    printf("\nProcess No: %d\n",i);
-    p.no=i;
-    printf("Enter Burst Time: ");
-    scanf("%d",&p.bt);
-    return p;
-}
-int main()
-{
-    struct proc p[10],tmp;
-    float avgtat=0,avgwt=0;
-    int n,ct=0;
-    printf("<--SJF Scheduling Algorithm Without Arrival Time (Non-Preemptive)-->\n");
-    printf("Enter Number of Processes: ");
-    scanf("%d",&n);
-    for(int i=0;i<n;i++)
-        p[i]=read(i+1);
-    for(int i=0;i<n-1;i++)
-        for(int j=0;j<n-i-1;j++)    
-            if(p[j].bt>p[j+1].bt)
-            {
-				tmp=p[j];
-				p[j]=p[j+1];
-				p[j+1]=tmp;
-            }
-    printf("\nProcessNo\tBT\tCT\tTAT\tWT\tRT\n");
-    for(int i=0;i<n;i++)
-    {
-        ct+=p[i].bt;
-		p[i].ct=p[i].tat=ct;
-		avgtat+=p[i].tat;
-        p[i].wt=p[i].tat-p[i].bt;
-        avgwt+=p[i].wt;
-        printf("P%d\t\t%d\t%d\t%d\t%d\t%d\n",p[i].no,p[i].bt,p[i].ct,p[i].tat,p[i].wt,p[i].wt);
+Program ini mengimplementasikan algoritma **Shortest Job First (SJF)** *tanpa mempertimbangkan arrival time* dan bersifat **non-preemptive**. Proses dieksekusi berdasarkan burst time terpendek dari semua proses yang tersedia.
+
+---
+
+##  Deskripsi
+
+- Proses dijalankan berdasarkan **durasi eksekusi terpendek (burst time)**.
+- **Tanpa arrival time**: diasumsikan semua proses tiba pada waktu 0.
+- **Non-preemptive**: proses yang berjalan tidak bisa dihentikan sampai selesai.
+
+---
+
+## Kode Program
+
+```c
+#include <stdio.h>
+
+int main() {
+    int n, i, j, temp;
+    int process[10], burst_time[10], waiting_time[10], turnaround_time[10];
+    int total_wt = 0, total_tat = 0;
+
+    printf("Masukkan jumlah proses: ");
+    scanf("%d", &n);
+
+    for (i = 0; i < n; i++) {
+        printf("Masukkan burst time untuk proses %d: ", i + 1);
+        scanf("%d", &burst_time[i]);
+        process[i] = i + 1;
     }
-    avgtat/=n,avgwt/=n;
-    printf("\nAverage TurnAroundTime=%f\nAverage WaitingTime=%f",avgtat,avgwt);
+
+    // Sorting burst time
+    for (i = 0; i < n - 1; i++) {
+        for (j = i + 1; j < n; j++) {
+            if (burst_time[i] > burst_time[j]) {
+                temp = burst_time[i];
+                burst_time[i] = burst_time[j];
+                burst_time[j] = temp;
+
+                temp = process[i];
+                process[i] = process[j];
+                process[j] = temp;
+            }
+        }
+    }
+
+    waiting_time[0] = 0;
+
+    for (i = 1; i < n; i++) {
+        waiting_time[i] = waiting_time[i - 1] + burst_time[i - 1];
+    }
+
+    for (i = 0; i < n; i++) {
+        turnaround_time[i] = waiting_time[i] + burst_time[i];
+        total_wt += waiting_time[i];
+        total_tat += turnaround_time[i];
+    }
+
+    printf("\nProses\tBT\tWT\tTAT\n");
+    for (i = 0; i < n; i++) {
+        printf("P%d\t%d\t%d\t%d\n", process[i], burst_time[i], waiting_time[i], turnaround_time[i]);
+    }
+
+    printf("\nRata-rata Waiting Time: %.2f", (float)total_wt / n);
+    printf("\nRata-rata Turnaround Time: %.2f\n", (float)total_tat / n);
+
+    return 0;
 }
+```
 
-Analisa : 
-Program ini pakai algoritma SJF non-preemptive tanpa arrival time. Cara kerjanya: input jumlah dan burst time proses, lalu proses diurutkan dari yang burst time-nya paling kecil. 
-Setelah itu, dihitung completion time, turnaround time, dan waiting time. Hasilnya ditampilkan dalam tabel, plus rata-rata TAT dan WT.
+##  Contoh Output
 
-contoh output : 
+```text
+Masukkan jumlah proses: 4
+Masukkan burst time untuk proses 1: 6
+Masukkan burst time untuk proses 2: 8
+Masukkan burst time untuk proses 3: 7
+Masukkan burst time untuk proses 4: 3
 
-ProcessNo   BT   CT   TAT   WT   RT
-P1          3    3    3     0    0
-P2          5    8    8     3    3
+Proses  BT  WT  TAT
+P4      3   0   3
+P1      6   3   9
+P3      7   9   16
+P2      8   16  24
 
-Kesimpulan : 
-Program ini menyimulasikan algoritma SJF Non-Preemptive tanpa arrival time dengan cara mengurutkan proses berdasarkan burst time terkecil dan menghitung waktu eksekusinya. 
-Hasilnya mencakup completion time, turnaround time, waiting time, dan response time.
+Rata-rata Waiting Time: 7.00
+Rata-rata Turnaround Time: 13.00
+```
