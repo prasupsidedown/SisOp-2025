@@ -1,4 +1,4 @@
-#  Shortest Job First (SJF) Non-Preemptive dengan Arrival Time
+#  Shortest Job First (SJF) Non-Preemptive With Arrival Time
 
 Program ini mengimplementasikan algoritma penjadwalan CPU **Shortest Job First (SJF) Non-Preemptive**, di mana proses dengan burst time terpendek akan dieksekusi lebih dahulu **setelah proses tersebut tiba** (diperhitungkan berdasarkan arrival time).
 
