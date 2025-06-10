@@ -22,67 +22,73 @@ Program ini mengimplementasikan algoritma penjadwalan CPU **Shortest Job First (
 ##  Kode Program
 
 ```c
-#include <stdio.h>
-
-int main() {
-    int n, temp;
-    int arrival_time[10], burst_time[10], process[10];
-    int waiting_time[10], turnaround_time[10];
-    int total_waiting = 0, total_turnaround = 0;
-
-    printf("Masukkan jumlah proses: ");
-    scanf("%d", &n);
-
-    for(int i = 0; i < n; i++) {
-        printf("Proses %d:\n", i+1);
-        printf("Arrival Time: ");
-        scanf("%d", &arrival_time[i]);
-        printf("Burst Time: ");
-        scanf("%d", &burst_time[i]);
-        process[i] = i+1;
-    }
-
-    // Sorting berdasarkan arrival time
-    for(int i = 0; i < n; i++) {
-        for(int j = i+1; j < n; j++) {
-            if(arrival_time[i] > arrival_time[j]) {
-                temp = arrival_time[i];
-                arrival_time[i] = arrival_time[j];
-                arrival_time[j] = temp;
-
-                temp = burst_time[i];
-                burst_time[i] = burst_time[j];
-                burst_time[j] = temp;
-
-                temp = process[i];
-                process[i] = process[j];
-                process[j] = temp;
+#include<stdio.h>
+struct proc
+{
+    int no,at,bt,it,ct,tat,wt;
+};
+struct proc read(int i)
+{
+    struct proc p;
+    printf("\nProcess No: %d\n",i);
+    p.no=i;
+    printf("Enter Arrival Time: ");
+    scanf("%d",&p.at);
+    printf("Enter Burst Time: ");
+    scanf("%d",&p.bt);
+    return p;
+}
+int main()
+{
+    int  n,j,min=0;
+    float avgtat=0,avgwt=0;
+    struct proc p[10],temp;
+    printf("<--SJF Scheduling Algorithm (Non-Preemptive)-->\n");
+    printf("Enter Number of Processes: ");
+    scanf("%d",&n);
+    for(int i=0;i<n;i++)
+        p[i]=read(i+1);
+    for(int i=0;i<n-1;i++)
+        for(j=0;j<n-i-1;j++)    
+            if(p[j].at>p[j+1].at)
+            {
+            temp=p[j];
+            p[j]=p[j+1];
+            p[j+1]=temp;
             }
-        }
+    for(j=1;j<n&&p[j].at==p[0].at;j++)
+        if(p[j].bt<p[min].bt)
+            min=j;
+    temp=p[0];
+    p[0]=p[min];
+    p[min]=temp;
+    p[0].it=p[0].at;
+    p[0].ct=p[0].it+p[0].bt;
+    for(int i=1;i<n;i++)
+    {
+        for(j=i+1,min=i;j<n&&p[j].at<=p[i-1].ct;j++)
+            if(p[j].bt<p[min].bt)
+                min=j;
+        temp=p[i];
+        p[i]=p[min];
+        p[min]=temp;
+        if(p[i].at<=p[i-1].ct)
+            p[i].it=p[i-1].ct;
+        else
+            p[i].it=p[i].at;
+        p[i].ct=p[i].it+p[i].bt;
     }
-
-    int time = arrival_time[0];
-    for(int i = 0; i < n; i++) {
-        if(time < arrival_time[i]) {
-            time = arrival_time[i];
-        }
-        waiting_time[i] = time - arrival_time[i];
-        time += burst_time[i];
-        turnaround_time[i] = waiting_time[i] + burst_time[i];
-
-        total_waiting += waiting_time[i];
-        total_turnaround += turnaround_time[i];
+    printf("\nProcess\t\tAT\tBT\tCT\tTAT\tWT\tRT\n");
+    for(int i=0;i<n;i++)
+    {
+        p[i].tat=p[i].ct-p[i].at;
+        avgtat+=p[i].tat;
+        p[i].wt=p[i].tat-p[i].bt;
+        avgwt+=p[i].wt;
+        printf("P%d\t\t%d\t%d\t%d\t%d\t%d\t%d\n",p[i].no,p[i].at,p[i].bt,p[i].ct,p[i].tat,p[i].wt,p[i].wt);
     }
-
-    printf("\nProses\tAT\tBT\tWT\tTAT\n");
-    for(int i = 0; i < n; i++) {
-        printf("P%d\t%d\t%d\t%d\t%d\n", process[i], arrival_time[i], burst_time[i], waiting_time[i], turnaround_time[i]);
-    }
-
-    printf("\nRata-rata Waiting Time: %.2f", (float)total_waiting / n);
-    printf("\nRata-rata Turnaround Time: %.2f\n", (float)total_turnaround / n);
-
-    return 0;
+    avgtat/=n,avgwt/=n;
+    printf("\nAverage TurnAroundTime=%f\nAverage WaitingTime=%f",avgtat,avgwt);
 }
 ```
 
@@ -126,58 +132,50 @@ Program ini mengimplementasikan algoritma *Shortest Job First (SJF)* tanpa mempe
 ## Kode Program
 
 ```c
-#include <stdio.h>
-
-int main() {
-    int n, i, j, temp;
-    int process[10], burst_time[10], waiting_time[10], turnaround_time[10];
-    int total_wt = 0, total_tat = 0;
-
-    printf("Masukkan jumlah proses: ");
-    scanf("%d", &n);
-
-    for (i = 0; i < n; i++) {
-        printf("Masukkan burst time untuk proses %d: ", i + 1);
-        scanf("%d", &burst_time[i]);
-        process[i] = i + 1;
-    }
-
-    // Sorting burst time
-    for (i = 0; i < n - 1; i++) {
-        for (j = i + 1; j < n; j++) {
-            if (burst_time[i] > burst_time[j]) {
-                temp = burst_time[i];
-                burst_time[i] = burst_time[j];
-                burst_time[j] = temp;
-
-                temp = process[i];
-                process[i] = process[j];
-                process[j] = temp;
+#include<stdio.h>
+struct proc
+{
+    int no,bt,ct,tat,wt;
+};
+struct proc read(int i)
+{
+    struct proc p;
+    printf("\nProcess No: %d\n",i);
+    p.no=i;
+    printf("Enter Burst Time: ");
+    scanf("%d",&p.bt);
+    return p;
+}
+int main()
+{
+    struct proc p[10],tmp;
+    float avgtat=0,avgwt=0;
+    int n,ct=0;
+    printf("<--SJF Scheduling Algorithm Without Arrival Time (Non-Preemptive)-->\n");
+    printf("Enter Number of Processes: ");
+    scanf("%d",&n);
+    for(int i=0;i<n;i++)
+        p[i]=read(i+1);
+    for(int i=0;i<n-1;i++)
+        for(int j=0;j<n-i-1;j++)    
+            if(p[j].bt>p[j+1].bt)
+            {
+				tmp=p[j];
+				p[j]=p[j+1];
+				p[j+1]=tmp;
             }
-        }
+    printf("\nProcessNo\tBT\tCT\tTAT\tWT\tRT\n");
+    for(int i=0;i<n;i++)
+    {
+        ct+=p[i].bt;
+		p[i].ct=p[i].tat=ct;
+		avgtat+=p[i].tat;
+        p[i].wt=p[i].tat-p[i].bt;
+        avgwt+=p[i].wt;
+        printf("P%d\t\t%d\t%d\t%d\t%d\t%d\n",p[i].no,p[i].bt,p[i].ct,p[i].tat,p[i].wt,p[i].wt);
     }
-
-    waiting_time[0] = 0;
-
-    for (i = 1; i < n; i++) {
-        waiting_time[i] = waiting_time[i - 1] + burst_time[i - 1];
-    }
-
-    for (i = 0; i < n; i++) {
-        turnaround_time[i] = waiting_time[i] + burst_time[i];
-        total_wt += waiting_time[i];
-        total_tat += turnaround_time[i];
-    }
-
-    printf("\nProses\tBT\tWT\tTAT\n");
-    for (i = 0; i < n; i++) {
-        printf("P%d\t%d\t%d\t%d\n", process[i], burst_time[i], waiting_time[i], turnaround_time[i]);
-    }
-
-    printf("\nRata-rata Waiting Time: %.2f", (float)total_wt / n);
-    printf("\nRata-rata Turnaround Time: %.2f\n", (float)total_tat / n);
-
-    return 0;
+    avgtat/=n,avgwt/=n;
+    printf("\nAverage TurnAroundTime=%f\nAverage WaitingTime=%f",avgtat,avgwt);
 }
 ```
 
@@ -217,69 +215,64 @@ Program ini mengimplementasikan algoritma *Shortest Remaining Time First (SRTF),
 ##  Kode Program
 
 ```c
-#include <stdio.h>
-#include <limits.h>
-
-int main() {
-    int n;
-    int arrival[10], burst[10], remaining[10];
-    int waiting[10], turnaround[10];
-    int complete = 0, time = 0, shortest;
-    int min_remaining = INT_MAX;
-    int finish_time;
-    float avg_wait = 0, avg_turnaround = 0;
-
-    printf("Masukkan jumlah proses: ");
-    scanf("%d", &n);
-
-    for (int i = 0; i < n; i++) {
-        printf("Proses %d:\n", i + 1);
-        printf("Arrival Time: ");
-        scanf("%d", &arrival[i]);
-        printf("Burst Time: ");
-        scanf("%d", &burst[i]);
-        remaining[i] = burst[i];
-    }
-
-    while (complete != n) {
-        shortest = -1;
-        min_remaining = INT_MAX;
-
-        for (int i = 0; i < n; i++) {
-            if (arrival[i] <= time && remaining[i] > 0 && remaining[i] < min_remaining) {
-                min_remaining = remaining[i];
-                shortest = i;
+#include<stdio.h>
+#define MAX 9999
+struct proc
+{
+    int no,at,bt,rt,ct,tat,wt;
+};
+struct proc read(int i)
+{
+    struct proc p;
+    printf("\nProcess No: %d\n",i);
+    p.no=i;
+    printf("Enter Arrival Time: ");
+    scanf("%d",&p.at);
+    printf("Enter Burst Time: ");
+    scanf("%d",&p.bt);
+    p.rt=p.bt;
+    return p;
+}
+int main()
+{
+    struct proc p[10],temp;
+    float avgtat=0,avgwt=0;
+    int n,s,remain=0,time;
+    printf("<--SRTF Scheduling Algorithm (Preemptive)-->\n");
+    printf("Enter Number of Processes: ");
+    scanf("%d",&n);
+    for(int i=0;i<n;i++)
+        p[i]=read(i+1);
+    for(int i=0;i<n-1;i++)
+        for(int j=0;j<n-i-1;j++)    
+            if(p[j].at>p[j+1].at)
+            {
+            temp=p[j];
+            p[j]=p[j+1];
+            p[j+1]=temp;
             }
+    printf("\nProcess\t\tAT\tBT\tCT\tTAT\tWT\n");
+    p[9].rt=MAX;
+    for(time=0;remain!=n;time++)
+    {
+        s=9;
+        for(int i=0;i<n;i++)
+            if(p[i].at<=time&&p[i].rt<p[s].rt&&p[i].rt>0)
+                s=i;
+        p[s].rt--;
+        if(p[s].rt==0)
+        {
+            remain++;
+            p[s].ct=time+1;
+            p[s].tat=p[s].ct-p[s].at;
+            avgtat+=p[s].tat;
+            p[s].wt=p[s].tat-p[s].bt;
+            avgwt+=p[s].wt;
+            printf("P%d\t\t%d\t%d\t%d\t%d\t%d\n",p[s].no,p[s].at,p[s].bt,p[s].ct,p[s].tat,p[s].wt);
         }
-
-        if (shortest == -1) {
-            time++;
-            continue;
-        }
-
-        remaining[shortest]--;
-        if (remaining[shortest] == 0) {
-            complete++;
-            finish_time = time + 1;
-            waiting[shortest] = finish_time - burst[shortest] - arrival[shortest];
-            if (waiting[shortest] < 0) waiting[shortest] = 0;
-            turnaround[shortest] = burst[shortest] + waiting[shortest];
-        }
-
-        time++;
     }
-
-    printf("\nProses\tAT\tBT\tWT\tTAT\n");
-    for (int i = 0; i < n; i++) {
-        printf("P%d\t%d\t%d\t%d\t%d\n", i + 1, arrival[i], burst[i], waiting[i], turnaround[i]);
-        avg_wait += waiting[i];
-        avg_turnaround += turnaround[i];
-    }
-
-    printf("\nRata-rata Waiting Time: %.2f", avg_wait / n);
-    printf("\nRata-rata Turnaround Time: %.2f\n", avg_turnaround / n);
-
-    return 0;
+    avgtat/=n,avgwt/=n;
+    printf("\nAverage TurnAroundTime=%f\nAverage WaitingTime=%f",avgtat,avgwt);
 }
 ```
 
